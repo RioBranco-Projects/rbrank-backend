@@ -27,9 +27,9 @@ app.get("/", (req, res) => {
 app.get("/api/status", (req, res) => {
   const now = new Date();
   const hour = now.getHours();
-  const isAvailable = hour >= 7 && hour < 22;
+  const isAvailable = hour >= 19 && hour < 23;
   let nextAvailableTime;
-  if (hour < 7) {
+  if (hour < 19) {
     nextAvailableTime = new Date();
     nextAvailableTime.setHours(19, 0, 0, 0);
   } else if (hour >= 23) {

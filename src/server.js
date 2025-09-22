@@ -35,7 +35,6 @@ app.get("/api/status", (req, res) => {
   } else if (hour >= 23) {
     nextAvailableTime = new Date();
     nextAvailableTime.setDate(nextAvailableTime.getDate() + 1);
-    nextAvailableTime.setHours(19, 0, 0, 0);
   }
   res.json({
     isAvailable,

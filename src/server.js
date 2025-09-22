@@ -45,7 +45,7 @@ app.get("/api/status", (req, res) => {
       : null,
     message: isAvailable
       ? "Plataforma disponível"
-      : "Aplicação disponível somente no horário letivo (19h às 23h)",
+      : "Plataforma indisponível no momento, somente no horário letivo (19h às 23h)",
   });
 });
 

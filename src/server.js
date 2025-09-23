@@ -27,34 +27,28 @@ app.get("/", (req, res) => {
 app.get("/api/status", (req, res) => {
   const now = new Date();
   const hour = now.getHours();
-  const minutes = now.getMinutes();
-  const totalMinutes = hour * 60 + minutes;
-  const start = 19 * 60;
-  const end = 23 * 60;
-  const isAvailable = totalMinutes >= start && totalMinutes < end;
-  let nextAvailableTime = null;
-  if (!isAvailable) {
-    nextAvailableTime = new Date(now);
-    if (totalMinutes < start) {
-      nextAvailableTime.setHours(19, 0, 0, 0);
-    } else {
-      nextAvailableTime.setDate(nextAvailableTime.getDate() + 1);
-      nextAvailableTime.setHours(19, 0, 0, 0);
-    }
+  const isAvailable = hour >= 19 && hour < 23;
+  let nextAvailableTime;
+  if (hour < 19) {
+    nextAvailableTime = new Date();
+    nextAvailableTime.setHours(19, 0, 0, 0);
+  } else if (hour >= 23) {
+    nextAvailableTime = new Date();
+    nextAvailableTime.setDate(nextAvailableTime.getDate() + 1);
+    nextAvailableTime.setHours(19, 0, 0, 0);
   }
   res.json({
     isAvailable,
-    currentTime: now.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+    currentHour: hour,
     nextAvailableTime: nextAvailableTime
-      ? nextAvailableTime.toLocaleString("pt-BR", {
-          timeZone: "America/Sao_Paulo",
-        })
+      ? nextAvailableTime.toISOString()
       : null,
     message: isAvailable
-      ? "✅ Plataforma disponível"
-      : "⛔ Plataforma indisponível. Disponível apenas das 19h às 23h.",
+      ? "Plataforma disponível"
+      : "Plataforma indisponível no momento, somente no horário letivo (19h às 23h)",
   });
 });
+
 app.use("/api/alunos", alunoRoutes);
 app.use("/api/professores", professorRoutes);
 app.use("/api/problemas", problemaRoutes);

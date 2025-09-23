@@ -26,29 +26,45 @@ app.get("/", (req, res) => {
 
 app.get("/api/status", (req, res) => {
   const now = new Date();
-  const hour = now.getHours();
+  const formatter = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  const hour = parseInt(
+    new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      hour12: false,
+    }).format(now),
+  );
+
   const isAvailable = hour >= 19 && hour < 23;
-  let nextAvailableTime;
+
+  let nextAvailableTime = null;
   if (hour < 19) {
-    nextAvailableTime = new Date();
+    nextAvailableTime = new Date(now);
     nextAvailableTime.setHours(19, 0, 0, 0);
   } else if (hour >= 23) {
-    nextAvailableTime = new Date();
+    nextAvailableTime = new Date(now);
     nextAvailableTime.setDate(nextAvailableTime.getDate() + 1);
     nextAvailableTime.setHours(19, 0, 0, 0);
   }
+
   res.json({
     isAvailable,
-    currentHour: hour,
+    currentHour: formatter.format(now),
     nextAvailableTime: nextAvailableTime
       ? nextAvailableTime.toISOString()
       : null,
     message: isAvailable
-      ? "Plataforma disponível"
-      : "Plataforma indisponível no momento, somente no horário letivo (19h às 23h)",
+      ? "✅ Plataforma disponível"
+      : "⛔ Plataforma indisponível. Disponível apenas das 19h às 23h",
   });
 });
-
 app.use("/api/alunos", alunoRoutes);
 app.use("/api/professores", professorRoutes);
 app.use("/api/problemas", problemaRoutes);

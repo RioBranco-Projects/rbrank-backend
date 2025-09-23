@@ -25,46 +25,53 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/status", (req, res) => {
+  const tz = "America/Sao_Paulo";
   const now = new Date();
-  const formatter = new Intl.DateTimeFormat("pt-BR", {
-    timeZone: "America/Sao_Paulo",
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
-  });
+  }).formatToParts(now);
 
-  const hour = parseInt(
-    new Intl.DateTimeFormat("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      hour: "2-digit",
-      hour12: false,
-    }).format(now),
-  );
+  const get = (t) => parseInt(parts.find((p) => p.type === t).value, 10);
+  const h = get("hour");
+  const m = get("minute");
+  const s = get("second");
 
-  const isAvailable = hour >= 19 && hour < 23;
+  const secNow = h * 3600 + m * 60 + s;
+  const start = 19 * 3600; // 19:00:00
+  const end = 23 * 3600; // 23:00:00
 
-  let nextAvailableTime = null;
-  if (hour < 19) {
-    nextAvailableTime = new Date(now);
-    nextAvailableTime.setHours(19, 0, 0, 0);
-  } else if (hour >= 23) {
-    nextAvailableTime = new Date(now);
-    nextAvailableTime.setDate(nextAvailableTime.getDate() + 1);
-    nextAvailableTime.setHours(19, 0, 0, 0);
+  const isAvailable = secNow >= start && secNow < end;
+
+  let secToNext;
+  if (isAvailable) {
+    secToNext = 0;
+  } else if (secNow < start) {
+    secToNext = start - secNow; // hoje às 19h
+  } else {
+    secToNext = 24 * 3600 - secNow + start; // amanhã às 19h
   }
 
+  const nextAvailableTime =
+    secToNext > 0 ? new Date(now.getTime() + secToNext * 1000) : null;
   res.json({
     isAvailable,
-    currentHour: formatter.format(now),
     nextAvailableTime: nextAvailableTime
       ? nextAvailableTime.toISOString()
       : null,
     message: isAvailable
-      ? "✅ Plataforma disponível"
-      : "⛔ Plataforma indisponível. Disponível apenas das 19h às 23h",
+      ? "Plataforma disponível"
+      : "Plataforma indisponível. Disponível apenas das 19h às 23h",
+    serverNowISO: now.toISOString(),
+    saoPauloClock: `${h.toString().padStart(2, "0")}:${m
+      .toString()
+      .padStart(2, "0")}:${s.toString().padStart(2, "0")}`,
   });
 });
+
 app.use("/api/alunos", alunoRoutes);
 app.use("/api/professores", professorRoutes);
 app.use("/api/problemas", problemaRoutes);

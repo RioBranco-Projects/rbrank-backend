@@ -15,6 +15,10 @@ export const cadastrarAluno = async (req, res) => {
       ra,
       semestre,
     });
+    // o RA do aluno cadastrado tem que começar com 211 e ter 6 digitos
+    if (!aluno.ra.startsWith("211") || aluno.ra.length !== 6) {
+      return res.status(400).json({ message: "RA inválido" });
+    }
 
     await aluno.save();
     res.status(201).json({ message: "Aluno cadastrado com sucesso", aluno });

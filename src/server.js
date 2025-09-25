@@ -41,7 +41,7 @@ app.get("/api/status", (req, res) => {
   const s = get("second");
 
   const secNow = h * 3600 + m * 60 + s;
-  const start = 10 * 3600; // 19:00:00
+  const start = 19 * 3600; // 19:00:00
   const end = 23 * 3600; // 23:00:00
 
   const isAvailable = secNow >= start && secNow < end;
